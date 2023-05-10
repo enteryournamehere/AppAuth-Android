@@ -5,9 +5,13 @@ apply plugin: 'signing'
 apply from: '../config/android-common.gradle'
 
 group = GROUP
-version = rootProject.versionName
+version = parent.versionName
 
 project.archivesBaseName = 'appauth'
+
+android {
+    namespace "net.openid.appauth"
+}
 
 android.testOptions {
     unitTests.includeAndroidResources = true
@@ -34,7 +38,7 @@ publishing {
         release(MavenPublication) {
             groupId GROUP
             artifactId POM_ARTIFACT_ID
-            version rootProject.versionName
+            version parent.versionName
 
             artifact("$buildDir/outputs/aar/${project.archivesBaseName}-release.aar")
             artifact sourcesJar
