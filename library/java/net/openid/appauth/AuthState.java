@@ -643,6 +643,7 @@ public class AuthState {
                 .setScope(null)
                 .setRefreshToken(mRefreshToken)
                 .setAdditionalParameters(additionalParameters)
+                .setUseJson(mLastAuthorizationResponse.request.useJson)
                 .build();
     }
 

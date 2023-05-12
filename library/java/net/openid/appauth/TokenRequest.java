@@ -65,6 +65,8 @@ public class TokenRequest {
     @VisibleForTesting
     static final String KEY_CODE_VERIFIER = "codeVerifier";
     @VisibleForTesting
+    static final String KEY_USE_JSON = "USE_JSON";
+    @VisibleForTesting
     static final String KEY_ADDITIONAL_PARAMETERS = "additionalParameters";
 
     public static final String PARAM_CLIENT_ID = "client_id";
@@ -146,6 +148,8 @@ public class TokenRequest {
      */
     @NonNull
     public final String clientId;
+
+    public final Boolean useJson;
 
     /**
      * The type of token being sent to the token endpoint.
@@ -248,6 +252,8 @@ public class TokenRequest {
 
         @NonNull
         private Map<String, String> mAdditionalParameters;
+
+        private Boolean mUseJson = false;
 
         /**
          * Creates a token request builder with the specified mandatory properties.
@@ -427,6 +433,11 @@ public class TokenRequest {
             return this;
         }
 
+        public Builder setUseJson(boolean truth) {
+            mUseJson = truth;
+            return this;
+        }
+
         /**
          * Produces a {@link TokenRequest} instance, if all necessary values have been provided.
          */
@@ -462,6 +473,7 @@ public class TokenRequest {
                     mAuthorizationCode,
                     mRefreshToken,
                     mCodeVerifier,
+                    mUseJson,
                     Collections.unmodifiableMap(mAdditionalParameters));
         }
 
@@ -488,6 +500,7 @@ public class TokenRequest {
             @Nullable String authorizationCode,
             @Nullable String refreshToken,
             @Nullable String codeVerifier,
+            Boolean useJson,
             @NonNull Map<String, String> additionalParameters) {
         this.configuration = configuration;
         this.clientId = clientId;
@@ -498,6 +511,7 @@ public class TokenRequest {
         this.authorizationCode = authorizationCode;
         this.refreshToken = refreshToken;
         this.codeVerifier = codeVerifier;
+        this.useJson = useJson;
         this.additionalParameters = additionalParameters;
     }
 
@@ -549,6 +563,7 @@ public class TokenRequest {
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
         JsonUtil.putIfNotNull(json, KEY_NONCE, nonce);
         JsonUtil.put(json, KEY_GRANT_TYPE, grantType);
+        JsonUtil.put(json, KEY_USE_JSON, useJson);
         JsonUtil.putIfNotNull(json, KEY_REDIRECT_URI, redirectUri);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
         JsonUtil.putIfNotNull(json, KEY_AUTHORIZATION_CODE, authorizationCode);
@@ -588,6 +603,7 @@ public class TokenRequest {
                 JsonUtil.getStringIfDefined(json, KEY_AUTHORIZATION_CODE),
                 JsonUtil.getStringIfDefined(json, KEY_REFRESH_TOKEN),
                 JsonUtil.getStringIfDefined(json, KEY_CODE_VERIFIER),
+                JsonUtil.getBoolean(json, KEY_USE_JSON),
                 JsonUtil.getStringMap(json, KEY_ADDITIONAL_PARAMETERS));
     }
 

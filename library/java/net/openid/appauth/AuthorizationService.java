@@ -606,12 +606,22 @@ public class AuthorizationService {
         protected JSONObject doInBackground(Void... voids) {
             InputStream is = null;
             try {
-                HttpURLConnection conn = mConnectionBuilder.openConnection(
-                        mRequest.configuration.tokenEndpoint);
+                Uri the_uri = mRequest.configuration.tokenEndpoint;
+                if (mRequest.useJson && mRequest.getRequestParameters().containsKey("refresh_token")) {
+                    the_uri = Uri.parse(the_uri + "/refresh");
+                }
+
+                HttpURLConnection conn = mConnectionBuilder.openConnection(the_uri);
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
                 addJsonToAcceptHeader(conn);
                 conn.setDoOutput(true);
+
+                if (mRequest.useJson) {
+                    conn.setRequestProperty("Content-Type", "application/json");
+                }
+                else {
+                    conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+                }
 
                 Map<String, String> headers = mClientAuthentication
                         .getRequestHeaders(mRequest.clientId);
@@ -628,11 +638,22 @@ public class AuthorizationService {
                     parameters.putAll(clientAuthParams);
                 }
 
-                String queryData = UriUtil.formUrlEncode(parameters);
-                conn.setRequestProperty("Content-Length", String.valueOf(queryData.length()));
+                String data;
+                if (mRequest.useJson) {
+                    JSONObject new_obj = new JSONObject();
+                    new_obj.put("clientId", parameters.get("client_id"));
+                    new_obj.put("clientId", mRequest.clientId);
+                    new_obj.put("code", parameters.get("code"));
+                    new_obj.put("refreshToken", parameters.get("refresh_token"));
+                    data = new_obj.toString();
+                }
+                else {
+                    data = UriUtil.formUrlEncode(parameters);
+                }
+                conn.setRequestProperty("Content-Length", String.valueOf(data.length()));
                 OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
 
-                wr.write(queryData);
+                wr.write(data);
                 wr.flush();
 
                 if (conn.getResponseCode() >= HttpURLConnection.HTTP_OK
@@ -684,6 +705,13 @@ public class AuthorizationService {
             }
 
             TokenResponse response;
+            if (mRequest.useJson) {
+                try {
+                    json.put(TokenResponse.KEY_TOKEN_TYPE, "bearer");
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             try {
                 response = new TokenResponse.Builder(mRequest).fromResponseJson(json).build();
             } catch (JSONException jsonEx) {

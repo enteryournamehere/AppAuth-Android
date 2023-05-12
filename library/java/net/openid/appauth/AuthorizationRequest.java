@@ -335,6 +335,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     private static final String KEY_UI_LOCALES = "ui_locales";
     private static final String KEY_RESPONSE_TYPE = "responseType";
     private static final String KEY_REDIRECT_URI = "redirectUri";
+    private static final String KEY_USE_JSON = "USE_JSON";
     private static final String KEY_SCOPE = "scope";
     private static final String KEY_STATE = "state";
     private static final String KEY_NONCE = "nonce";
@@ -558,6 +559,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
     @NonNull
     public final Map<String, String> additionalParameters;
 
+    public Boolean useJson;
+
     /**
      * Creates instances of {@link AuthorizationRequest}.
      */
@@ -626,6 +629,8 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         @Nullable
         private String mClaimsLocales;
 
+        private Boolean mUseJson;
+
         @NonNull
         private Map<String, String> mAdditionalParameters = new HashMap<>();
 
@@ -638,9 +643,11 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                 @NonNull AuthorizationServiceConfiguration configuration,
                 @NonNull String clientId,
                 @NonNull String responseType,
-                @NonNull Uri redirectUri) {
+                @NonNull Uri redirectUri,
+                Boolean useJson) {
             setAuthorizationServiceConfiguration(configuration);
             setClientId(clientId);
+            setUseJson(useJson);
             setResponseType(responseType);
             setRedirectUri(redirectUri);
             setState(AuthorizationManagementUtil.generateRandomState());
@@ -669,6 +676,11 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         @NonNull
         public Builder setClientId(@NonNull String clientId) {
             mClientId = checkNotEmpty(clientId, "client ID cannot be null or empty");
+            return this;
+        }
+
+        public Builder setUseJson(Boolean useJson) {
+            mUseJson = useJson;
             return this;
         }
 
@@ -1068,6 +1080,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                     mClientId,
                     mResponseType,
                     mRedirectUri,
+                    mUseJson,
                     mDisplay,
                     mLoginHint,
                     mPrompt,
@@ -1090,6 +1103,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
             @NonNull String clientId,
             @NonNull String responseType,
             @NonNull Uri redirectUri,
+            @NonNull Boolean useJson,
             @Nullable String display,
             @Nullable String loginHint,
             @Nullable String prompt,
@@ -1110,6 +1124,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         this.responseType = responseType;
         this.redirectUri = redirectUri;
         this.additionalParameters = additionalParameters;
+        this.useJson = useJson;
 
         // optional fields
         this.display = display;
@@ -1217,6 +1232,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
         JsonUtil.put(json, KEY_CLIENT_ID, clientId);
         JsonUtil.put(json, KEY_RESPONSE_TYPE, responseType);
         JsonUtil.put(json, KEY_REDIRECT_URI, redirectUri.toString());
+        JsonUtil.put(json, KEY_USE_JSON, useJson);
         JsonUtil.putIfNotNull(json, KEY_DISPLAY, display);
         JsonUtil.putIfNotNull(json, KEY_LOGIN_HINT, loginHint);
         JsonUtil.putIfNotNull(json, KEY_SCOPE, scope);
@@ -1260,6 +1276,7 @@ public class AuthorizationRequest implements AuthorizationManagementRequest {
                 JsonUtil.getString(json, KEY_CLIENT_ID),
                 JsonUtil.getString(json, KEY_RESPONSE_TYPE),
                 JsonUtil.getUri(json, KEY_REDIRECT_URI),
+                JsonUtil.getBoolean(json, KEY_USE_JSON),
                 JsonUtil.getStringIfDefined(json, KEY_DISPLAY),
                 JsonUtil.getStringIfDefined(json, KEY_LOGIN_HINT),
                 JsonUtil.getStringIfDefined(json, KEY_PROMPT),

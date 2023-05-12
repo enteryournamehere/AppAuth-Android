@@ -466,6 +466,7 @@ public class AuthorizationResponse extends AuthorizationManagementResponse {
                 .setAuthorizationCode(authorizationCode)
                 .setAdditionalParameters(additionalExchangeParameters)
                 .setNonce(request.nonce)
+                .setUseJson(request.useJson)
                 .build();
     }
 
